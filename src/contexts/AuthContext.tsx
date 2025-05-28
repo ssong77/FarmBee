@@ -1,4 +1,5 @@
-import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react'
+import type { ReactNode } from 'react'
+import { createContext, useState, useContext, useEffect } from 'react'
 
 export interface User {
   id: number
@@ -21,19 +22,16 @@ const AuthContext = createContext<AuthContextType>({
   logout: () => {},
 })
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const isLoggedIn = Boolean(user)
 
   useEffect(() => {
     const stored = localStorage.getItem('user')
-    if (stored) {
-      setUser(JSON.parse(stored))
-    }
+    if (stored) setUser(JSON.parse(stored))
   }, [])
 
   const login = (userid: string) => {
-    // 더미 유저 정보
     const fakeUser: User = { id: 1, userid, name: '홍길동' }
     setUser(fakeUser)
     localStorage.setItem('user', JSON.stringify(fakeUser))

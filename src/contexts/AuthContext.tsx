@@ -1,5 +1,4 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react'
-import { backendAPI } from '../services/api'
 
 export interface User {
   id: number
@@ -11,52 +10,38 @@ export interface User {
 interface AuthContextType {
   isLoggedIn: boolean
   user: User | null
-  login: (token: string, user: User) => void
-  logout: () => Promise<void>
+  login: (userid: string) => void
+  logout: () => void
 }
 
 const AuthContext = createContext<AuthContextType>({
   isLoggedIn: false,
   user: null,
   login: () => {},
-  logout: async () => {},
+  logout: () => {},
 })
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null)
-  const [token, setToken] = useState<string | null>(null)
-  const isLoggedIn = Boolean(token)
+  const isLoggedIn = Boolean(user)
 
   useEffect(() => {
-    const t = localStorage.getItem('token')
-    const u = localStorage.getItem('user')
-    if (t && u) {
-      setToken(t)
-      setUser(JSON.parse(u))
-      backendAPI.defaults.headers.common['Authorization'] = `Bearer ${t}`
+    const stored = localStorage.getItem('user')
+    if (stored) {
+      setUser(JSON.parse(stored))
     }
   }, [])
 
-  const login = (newToken: string, newUser: User) => {
-    setToken(newToken)
-    setUser(newUser)
-    localStorage.setItem('token', newToken)
-    localStorage.setItem('user', JSON.stringify(newUser))
-    backendAPI.defaults.headers.common['Authorization'] = `Bearer ${newToken}`
+  const login = (userid: string) => {
+    // 더미 유저 정보
+    const fakeUser: User = { id: 1, userid, name: '홍길동' }
+    setUser(fakeUser)
+    localStorage.setItem('user', JSON.stringify(fakeUser))
   }
 
-  const logout = async () => {
-    try {
-      // 본문 없이 쿠키 기반 로그아웃 호출
-      await backendAPI.post('/auth/logout')
-    } catch (e) {
-      console.warn('로그아웃 API 호출 중 에러', e)
-    }
-    setToken(null)
+  const logout = () => {
     setUser(null)
-    localStorage.removeItem('token')
     localStorage.removeItem('user')
-    delete backendAPI.defaults.headers.common['Authorization']
   }
 
   return (

@@ -1,57 +1,88 @@
-// src/components/Header.tsx (예시)
-import React from 'react';
-import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
-import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import React, { useState } from 'react'
+import {
+  AppBar,
+  Toolbar,
+  IconButton,
+  Button,
+  Menu,
+  MenuItem,
+  Box,
+  Link,
+  Typography,
+} from '@mui/material'
+import { Link as RouterLink, useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
+import AccountCircle from '@mui/icons-material/AccountCircle'
+import LogoImage from '../assets/images/FarmBee.png'
 
 export default function Header() {
-  const navigate = useNavigate();
-  const { isLoggedIn, logout } = useAuth(); // logout 함수가 있다고 가정
+  const navigate = useNavigate()
+  const { isLoggedIn, logout } = useAuth()
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
 
+  const handleMenuOpen = (e: React.MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget)
+  const handleMenuClose = () => setAnchorEl(null)
   const handleLogout = () => {
-    logout(); // 실제 로그아웃 로직 호출
-    navigate('/login');
-  };
+    logout()
+    handleMenuClose()
+    navigate('/')
+  }
+  const handleMypage = () => {
+    handleMenuClose()
+    navigate('/mypage')
+  }
 
   return (
-    <AppBar
-      position="static" // 'sticky'나 'fixed' 대신 'static'으로 변경
-      elevation={0} // 그림자 제거 (Paper의 elevation과 동일)
-      sx={{
-        // 배경색, 투명도, blur 효과 등의 시각적 스타일 제거
-        // 기본 Material-UI 앱바 색상을 따르거나, theme에서 설정된 배경색 사용
-      }}
-    >
-      <Toolbar>
-        <Typography
-          variant="h6"
-          component={RouterLink}
-          to="/"
-          sx={{
-            flexGrow: 1,
-            textDecoration: 'none',
-            color: 'inherit', // Typography의 기본 색상 사용
-          }}
+    <AppBar position="static" color="transparent" elevation={1}>
+      <Toolbar sx={{ justifyContent: 'space-between' }}>
+        {/* 로고 */}
+        <Box
+          onClick={() => navigate('/')}
+          sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
         >
-          My App
-        </Typography>
+          <img src={LogoImage} alt="FarmBee" style={{ height: 40 }} />
+        </Box>
+
+        {/* 중앙 네비게이션 */}
+        <Box sx={{ display: 'flex', gap: 4 }}>
+          {['분석결과', '예약관리', '통계현황'].map((label) => (
+            <Typography
+              key={label}
+              onClick={() => navigate(`/${label}`)}
+              sx={{
+                cursor: 'pointer',
+                fontWeight: 500,
+                color: 'text.primary',
+                '&:hover': { color: 'primary.main' },
+              }}
+            >
+              {label}
+            </Typography>
+          ))}
+        </Box>
+
+        {/* 우측 로그인/마이페이지 */}
         <Box>
+          <Link component={RouterLink} to="/about" underline="none" sx={{ mr: 2 }}>
+            About Us
+          </Link>
           {isLoggedIn ? (
-            <Button color="inherit" onClick={handleLogout}>
-              로그아웃
-            </Button>
-          ) : (
             <>
-              <Button color="inherit" component={RouterLink} to="/login">
-                로그인
-              </Button>
-              <Button color="inherit" component={RouterLink} to="/signup" sx={{ ml: 1 }}>
-                회원가입
-              </Button>
+              <IconButton aria-label="account" onClick={handleMenuOpen}>
+                <AccountCircle />
+              </IconButton>
+              <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
+                <MenuItem onClick={handleMypage}>마이페이지</MenuItem>
+                <MenuItem onClick={handleLogout}>로그아웃</MenuItem>
+              </Menu>
             </>
+          ) : (
+            <Button variant="outlined" size="small" onClick={() => navigate('/login')}>
+              로그인
+            </Button>
           )}
         </Box>
       </Toolbar>
     </AppBar>
-  );
+  )
 }

@@ -1,5 +1,6 @@
-import { Box, AppBar, Toolbar, IconButton, Button, Menu, MenuItem, Link, Typography } from '@mui/material'
-import { Link as RouterLink, useNavigate } from 'react-router-dom'
+// src/components/Header.tsx
+import { Box, AppBar, Toolbar, IconButton, Button, Menu, MenuItem, Typography } from '@mui/material'
+import { useNavigate } from 'react-router-dom'
 import AccountCircle from '@mui/icons-material/AccountCircle'
 import { useAuth } from '../contexts/AuthContext'
 import LogoImage from '../assets/images/FarmBee.png'
@@ -22,43 +23,63 @@ export default function Header() {
     navigate('/mypage')
   }
 
-  const navItems = ['분석결과', '예약관리', '통계현황'] as const
+  const navItems = [
+    { label: '분석관리', path: '/analysis' },
+    { label: '예약관리', path: '/reservation' },
+    { label: '통계현황', path: '/statistics' },
+  ] as const
 
   return (
     <AppBar position="static" color="transparent" elevation={1}>
       <Toolbar sx={{ justifyContent: 'space-between' }}>
-        <Box onClick={() => navigate('/')} sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+        {/* 로고 클릭 시 홈으로 이동 */}
+        <Box
+          onClick={() => navigate('/')}
+          sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+        >
           <img src={LogoImage} alt="FarmBee" style={{ height: 40 }} />
         </Box>
 
+        {/* 네비게이션 메뉴 */}
         <Box sx={{ display: 'flex', gap: 4 }}>
-          {navItems.map((label) => (
+          {navItems.map(({ label, path }) => (
             <Typography
-              key={label}
-              onClick={() => navigate(`/${label}`)}
-              sx={{ cursor: 'pointer', fontWeight: 500, color: 'text.primary', '&:hover': { color: 'primary.main' } }}
+              key={path}
+              onClick={() => navigate(path)}
+              sx={{
+                cursor: 'pointer',
+                fontWeight: 500,
+                color: 'text.primary',
+                '&:hover': { color: 'primary.main' },
+              }}
             >
               {label}
             </Typography>
           ))}
         </Box>
 
+        {/* 로그인/회원 아이콘 및 메뉴 */}
         <Box>
-          <Link component={RouterLink} to="/about" underline="none" sx={{ mr: 2 }}>
-            About Us
-          </Link>
           {isLoggedIn ? (
             <>
               <IconButton onClick={handleMenuOpen}>
                 <AccountCircle />
               </IconButton>
-              <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
+              <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleMenuClose}
+              >
                 <MenuItem onClick={handleMypage}>마이페이지</MenuItem>
                 <MenuItem onClick={handleLogout}>로그아웃</MenuItem>
               </Menu>
             </>
           ) : (
-            <Button variant="outlined" size="small" onClick={() => navigate('/login')}>
+            <Button
+              variant="outlined"
+              size="small"
+              onClick={() => navigate('/login')}
+            >
               로그인
             </Button>
           )}

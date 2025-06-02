@@ -1,3 +1,4 @@
+// src/pages/Login.tsx
 import { useState } from 'react'
 import {
   Box,
@@ -12,6 +13,10 @@ import {
   Button,
   Snackbar,
   Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material'
 import { Visibility, VisibilityOff } from '@mui/icons-material'
 import { useNavigate, Link as RouterLink } from 'react-router-dom'
@@ -24,7 +29,10 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
   const [alertOpen, setAlertOpen] = useState(false)
-  const [alertInfo, setAlertInfo] = useState<{ severity: 'success' | 'error'; message: string }>({
+  const [alertInfo, setAlertInfo] = useState<{
+    severity: 'success' | 'error'
+    message: string
+  }>({
     severity: 'success',
     message: '',
   })
@@ -32,16 +40,56 @@ export default function Login() {
   const navigate = useNavigate()
   const { login } = useAuth()
 
+  // 비밀번호 찾기 모달 상태
+  const [openForgotDialog, setOpenForgotDialog] = useState(false)
+  const [forgotInput, setForgotInput] = useState('')
+
+  // 일반 로그인/관리자 로그인 구분
   const handleLogin = () => {
-    if (userid === '1234' && password === '1234') {
+    if (userid === '1' && password === '1') {
+      // 관리자 로그인
+      login(userid) // 필요 시 token 등 저장
+      setAlertInfo({ severity: 'success', message: '관리자 로그인 성공!' })
+      setAlertOpen(true)
+      setTimeout(() => navigate('/admin'), 1000)
+    } else if (userid === '1234' && password === '1234') {
+      // 일반 사용자 로그인
       login(userid)
       setAlertInfo({ severity: 'success', message: '로그인 성공!' })
       setAlertOpen(true)
       setTimeout(() => navigate('/'), 1000)
     } else {
-      setAlertInfo({ severity: 'error', message: '아이디 또는 비밀번호가 올바르지 않습니다.' })
+      setAlertInfo({
+        severity: 'error',
+        message: '아이디 또는 비밀번호가 올바르지 않습니다.',
+      })
       setAlertOpen(true)
     }
+  }
+
+  // 비밀번호 찾기 다이얼로그 열기/닫기
+  const handleOpenForgotDialog = () => {
+    setForgotInput('')
+    setOpenForgotDialog(true)
+  }
+  const handleCloseForgotDialog = () => {
+    setOpenForgotDialog(false)
+  }
+
+  // 비밀번호 찾기 제출 (더미 로직)
+  const handleSubmitForgot = () => {
+    if (forgotInput.trim() === '') {
+      setAlertInfo({ severity: 'error', message: '아이디 또는 이메일을 입력하세요.' })
+      setAlertOpen(true)
+      return
+    }
+    // 실제로는 서버 API 호출하여 메일 전송 등
+    setAlertInfo({
+      severity: 'success',
+      message: `'${forgotInput}'(으)로 비밀번호 재설정 메일을 전송했습니다.`,
+    })
+    setAlertOpen(true)
+    setOpenForgotDialog(false)
   }
 
   return (
@@ -81,25 +129,54 @@ export default function Login() {
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
-                    <IconButton onClick={() => setShowPassword((s) => !s)} edge="end">
+                    <IconButton
+                      onClick={() => setShowPassword((s) => !s)}
+                      edge="end"
+                    >
                       {showPassword ? <VisibilityOff /> : <Visibility />}
                     </IconButton>
                   </InputAdornment>
                 ),
               }}
             />
-            <Box display="flex" justifyContent="space-between" alignItems="center" my={2}>
+
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              my={2}
+            >
               <FormControlLabel
-                control={<Checkbox checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />}
+                control={
+                  <Checkbox
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                  />
+                }
                 label="로그인 정보 기억"
               />
-              <RouterLink to="#" style={{ textDecoration: 'none' }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  cursor: 'pointer',
+                  color: 'primary.main',
+                  '&:hover': { textDecoration: 'underline' },
+                }}
+                onClick={handleOpenForgotDialog}
+              >
                 비밀번호 찾기
-              </RouterLink>
+              </Typography>
             </Box>
-            <Button variant="contained" fullWidth size="large" onClick={handleLogin}>
+
+            <Button
+              variant="contained"
+              fullWidth
+              size="large"
+              onClick={handleLogin}
+            >
               Sign in
             </Button>
+
             <Typography variant="body2" color="text.secondary" mt={2}>
               계정이 없으신가요?{' '}
               <RouterLink to="/signup" style={{ textDecoration: 'underline' }}>
@@ -109,16 +186,59 @@ export default function Login() {
           </Paper>
         </Container>
       </Box>
+
+      {/* Snackbar 알림 */}
       <Snackbar
         open={alertOpen}
-        autoHideDuration={2000}
+        autoHideDuration={3000}
         onClose={() => setAlertOpen(false)}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       >
-        <Alert severity={alertInfo.severity} onClose={() => setAlertOpen(false)} sx={{ width: '100%' }}>
+        <Alert
+          severity={alertInfo.severity}
+          onClose={() => setAlertOpen(false)}
+          sx={{ width: '100%' }}
+        >
           {alertInfo.message}
         </Alert>
       </Snackbar>
+
+      {/* 비밀번호 찾기 모달 */}
+      <Dialog
+        open={openForgotDialog}
+        onClose={handleCloseForgotDialog}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>비밀번호 찾기</DialogTitle>
+        <DialogContent dividers>
+          <Typography variant="body2" color="text.secondary" mb={2}>
+            등록하신 아이디 또는 이메일 주소를 입력하시면, 비밀번호 재설정 링크를
+            보내드립니다.
+          </Typography>
+          <TextField
+            fullWidth
+            margin="normal"
+            label="아이디 또는 이메일"
+            value={forgotInput}
+            onChange={(e) => setForgotInput(e.target.value)}
+            placeholder="예: user@example.com"
+          />
+        </DialogContent>
+        <DialogActions sx={{ px: 3, py: 2 }}>
+          <Button
+            color="error"
+            variant="contained"
+            onClick={handleCloseForgotDialog}
+          >
+            취소
+          </Button>
+          <Box sx={{ flex: 1 }} />
+          <Button variant="contained" onClick={handleSubmitForgot}>
+            전송
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   )
 }

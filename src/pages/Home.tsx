@@ -3,7 +3,6 @@ import {
   Box,
   Container,
   Typography,
-  Button,
   Card,
   CardMedia,
   CardContent,
@@ -18,8 +17,7 @@ import {
   Tooltip,
   Legend,
 } from 'recharts'
-import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../contexts/AuthContext'
+
 import Header from '../components/Header'
 import droneImage from '../assets/images/drone.jpg'
 import reportImage from '../assets/images/report.jpg'
@@ -39,9 +37,8 @@ const dummyTableRows = [
 ]
 
 export default function Home() {
-  const navigate = useNavigate()
-  const { isLoggedIn } = useAuth()
-  const handleStart = () => (isLoggedIn ? navigate('/upload') : navigate('/login'))
+
+  //const handleStart = () => (isLoggedIn ? navigate('/upload') : navigate('/login'))
 
   return (
     <Box
@@ -63,9 +60,7 @@ export default function Home() {
           <Typography variant="h6" color="text.secondary" mb={4}>
             드론 기반 실시간 작물·토양 분석과 AI 리포트를 즉시 제공합니다
           </Typography>
-          <Button variant="contained" size="large" onClick={handleStart}>
-            시작하기!
-          </Button>
+          
         </Container>
 
         {/* 카드형 기능 블록 */}

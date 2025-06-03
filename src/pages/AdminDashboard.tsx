@@ -5,114 +5,114 @@ import {
   Container,
   Typography,
   Paper,
-  Button,
+ 
 } from '@mui/material'
-import { useNavigate } from 'react-router-dom'
+
 
 // ─── 관리자 전용 메뉴바 ───
-function AdminHeader() {
-  const navigate = useNavigate()
-  return (
-    <Box
-      sx={{
-        bgcolor: 'white',
-        borderBottom: 1,
-        borderColor: 'divider',
-      }}
-    >
-      <Container maxWidth="lg">
-        <Box
-          display="flex"
-          alignItems="center"
-          justifyContent="space-between"
-          py={2}
-        >
-          <Typography
-            variant="h6"
-            sx={{ cursor: 'pointer' }}
-            onClick={() => navigate('/admin')}
-          >
-            Admin Dashboard
-          </Typography>
+// function AdminHeader() {
+//   const navigate = useNavigate()
+//   return (
+//     <Box
+//       sx={{
+//         bgcolor: 'white',
+//         borderBottom: 1,
+//         borderColor: 'divider',
+//       }}
+//     >
+//       <Container maxWidth="lg">
+//         <Box
+//           display="flex"
+//           alignItems="center"
+//           justifyContent="space-between"
+//           py={2}
+//         >
+//           <Typography
+//             variant="h6"
+//             sx={{ cursor: 'pointer' }}
+//             onClick={() => navigate('/admin')}
+//           >
+//             Admin Dashboard
+//           </Typography>
 
-          {/* 관리자 이름 + 로그아웃 버튼(예시) */}
-          <Box>
-            <Typography
-              variant="body2"
-              component="span"
-              sx={{ mr: 2, cursor: 'pointer' }}
-            >
-              관리자 아무개
-            </Typography>
-            <Button
-              size="small"
-              onClick={() => {
-                // 로그아웃 처리 후 로그인 페이지로 이동
-                navigate('/login')
-              }}
-            >
-              로그아웃
-            </Button>
-          </Box>
-        </Box>
+//           {/* 관리자 이름 + 로그아웃 버튼(예시) */}
+//           <Box>
+//             <Typography
+//               variant="body2"
+//               component="span"
+//               sx={{ mr: 2, cursor: 'pointer' }}
+//             >
+//               관리자 아무개
+//             </Typography>
+//             <Button
+//               size="small"
+//               onClick={() => {
+//                 // 로그아웃 처리 후 로그인 페이지로 이동
+//                 navigate('/login')
+//               }}
+//             >
+//               로그아웃
+//             </Button>
+//           </Box>
+//         </Box>
 
-        {/* 관리자 메뉴 */}
-        <Box display="flex" gap={3} pb={1}>
-          <Typography
-            sx={{
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              '&:hover': { color: 'primary.main' },
-            }}
-            onClick={() => navigate('/admin/users')}
-          >
-            사용자 관리
-          </Typography>
-          <Typography
-            sx={{
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              '&:hover': { color: 'primary.main' },
-            }}
-            onClick={() => navigate('/reservation')}
-          >
-            예약 관리
-          </Typography>
-          <Typography
-            sx={{
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              '&:hover': { color: 'primary.main' },
-            }}
-            onClick={() => navigate('/analysis')}
-          >
-            분석 리포트
-          </Typography>
-          <Typography
-            sx={{
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              '&:hover': { color: 'primary.main' },
-            }}
-            onClick={() => navigate('/statistics')}
-          >
-            통계 관리
-          </Typography>
-          <Typography
-            sx={{
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              '&:hover': { color: 'primary.main' },
-            }}
-            onClick={() => navigate('/admin/settings')}
-          >
-            시스템 설정
-          </Typography>
-        </Box>
-      </Container>
-    </Box>
-  )
-}
+//         {/* 관리자 메뉴 */}
+//         <Box display="flex" gap={3} pb={1}>
+//           <Typography
+//             sx={{
+//               cursor: 'pointer',
+//               fontWeight: 'bold',
+//               '&:hover': { color: 'primary.main' },
+//             }}
+//             onClick={() => navigate('/admin/users')}
+//           >
+//             사용자 관리
+//           </Typography>
+//           <Typography
+//             sx={{
+//               cursor: 'pointer',
+//               fontWeight: 'bold',
+//               '&:hover': { color: 'primary.main' },
+//             }}
+//             onClick={() => navigate('/admin/reservation')}
+//           >
+//             예약 관리
+//           </Typography>
+//           <Typography
+//             sx={{
+//               cursor: 'pointer',
+//               fontWeight: 'bold',
+//               '&:hover': { color: 'primary.main' },
+//             }}
+//             onClick={() => navigate('/analysis')}
+//           >
+//             분석 리포트
+//           </Typography>
+//           <Typography
+//             sx={{
+//               cursor: 'pointer',
+//               fontWeight: 'bold',
+//               '&:hover': { color: 'primary.main' },
+//             }}
+//             onClick={() => navigate('/statistics')}
+//           >
+//             통계 관리
+//           </Typography>
+//           <Typography
+//             sx={{
+//               cursor: 'pointer',
+//               fontWeight: 'bold',
+//               '&:hover': { color: 'primary.main' },
+//             }}
+//             onClick={() => navigate('/admin/settings')}
+//           >
+//             시스템 설정
+//           </Typography>
+//         </Box>
+//       </Container>
+//     </Box>
+//   )
+// }
 
 export default function AdminDashboard() {
   // 더미 데이터 (목업 이미지 기준)
@@ -122,8 +122,7 @@ export default function AdminDashboard() {
 
   return (
     <Box sx={{ bgcolor: '#f5f5f5', minHeight: '100vh' }}>
-      {/* 관리자 전용 Header + 메뉴바만 표시 */}
-      <AdminHeader />
+      
 
       {/* Main Content */}
       <Box component="main" sx={{ mt: 2, pb: 4 }}>

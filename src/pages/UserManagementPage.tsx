@@ -21,10 +21,10 @@ import {
   InputLabel,
   Select,
   MenuItem as SelectMenuItem,
-  Button,
+
 } from '@mui/material'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
-import AdminHeader from '../components/AdminHeader'
+
 
 // ─── 더미 사용자 데이터 ───
 interface User {
@@ -133,7 +133,7 @@ export default function UserManagementPage() {
       }}
     >
       {/* 공통 Header */}
-      <AdminHeader />
+  
 
       {/* Main Content */}
       <Box component="main" sx={{ mt: '64px', py: 4 }}>

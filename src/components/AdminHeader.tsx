@@ -49,7 +49,7 @@ export default function AdminHeader() {
               fontWeight: 'bold',
               '&:hover': { color: 'primary.main' },
             }}
-            onClick={() => navigate('/reservation')}
+            onClick={() => navigate('/admin/reservations')}
           >
             예약 관리
           </Typography>
@@ -59,7 +59,7 @@ export default function AdminHeader() {
               fontWeight: 'bold',
               '&:hover': { color: 'primary.main' },
             }}
-            onClick={() => navigate('/analysis')}
+            onClick={() => navigate('/admin/analysis-reports')}
           >
             분석 리포트
           </Typography>
@@ -69,7 +69,7 @@ export default function AdminHeader() {
               fontWeight: 'bold',
               '&:hover': { color: 'primary.main' },
             }}
-            onClick={() => navigate('/statistics')}
+            onClick={() => navigate('/admin/statistics')}
           >
             통계 관리
           </Typography>

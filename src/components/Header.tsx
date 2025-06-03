@@ -1,4 +1,5 @@
 // src/components/Header.tsx
+
 import { Box, AppBar, Toolbar, IconButton, Button, Menu, MenuItem, Typography } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import AccountCircle from '@mui/icons-material/AccountCircle'
@@ -23,11 +24,22 @@ export default function Header() {
     navigate('/mypage')
   }
 
+  // 네비게이션 메뉴 항목 정의 (레이블과 경로)
   const navItems = [
     { label: '분석관리', path: '/analysis' },
     { label: '예약관리', path: '/reservation' },
     { label: '통계현황', path: '/statistics' },
   ] as const
+
+  // 각 메뉴 클릭 시 호출되는 함수
+  const handleNavClick = (path: string) => {
+    if (!isLoggedIn) {
+      alert('로그인을 해주세요!')
+      navigate('/login')
+    } else {
+      navigate(path)
+    }
+  }
 
   return (
     <AppBar position="static" color="transparent" elevation={1}>
@@ -45,7 +57,7 @@ export default function Header() {
           {navItems.map(({ label, path }) => (
             <Typography
               key={path}
-              onClick={() => navigate(path)}
+              onClick={() => handleNavClick(path)}
               sx={{
                 cursor: 'pointer',
                 fontWeight: 500,

@@ -1,6 +1,7 @@
-// src/pages/UserManagementPage.tsx
+// src/pages/ReservationPage.tsx
+import React, { useState } from 'react'
 
-import React, { useState, useMemo } from 'react'
+// 
 import {
   Box,
   Container,
@@ -16,111 +17,266 @@ import {
   Menu,
   MenuItem,
   Pagination,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem as SelectMenuItem,
+  FormControlLabel,
+  Checkbox,
+  FormControl,      // ← 누락되었다면 반드시 추가
+  InputLabel,       // ← 누락되었다면 반드시 추가
+  Select,           // ← 누락되었다면 반드시 추가
   Button,
 } from '@mui/material'
+
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import Header from '../components/Header'
 
-// ─── 더미 사용자 데이터 ───
-interface User {
+// ─── 더미 예약 데이터 (총 10개) ───
+interface Reservation {
   id: number
-  joinDate: string   // 가입일 (예: '2025-01-11')
-  username: string   // 사용자 이름 (예: '홍길동')
-  email: string      // 이메일 (예: 'o1@naver.com')
-  role: '사용자' | '관리자'
-  status: '정상' | '차단'
+  date: string      // 예약 일자 (예: '2025-05-10')
+  area: string      // 작업 구역 (예: '충북 옥천군 동이면 23-1번지')
+  time: string      // 예약 시간 (예: '10:00 ~ 11:30')
+  tasks: string[]   // 작업 항목 (예: ['토양 수분 측정','병해 감지'])
+  drone: string     // 드론 기체 (예: 'SkyScout X1')
+  status: '대기' | '진행중' | '완료' | '취소' // 예약 상태
 }
 
-const initialUsers: User[] = [
-  { id: 1, joinDate: '2025-01-11', username: '홍길동', email: 'o1@naver.com', role: '사용자', status: '정상' },
-  { id: 2, joinDate: '2025-01-26', username: '아무개', email: 'a1@gmail.com', role: '관리자', status: '정상' },
-  { id: 3, joinDate: '2025-02-05', username: '김철수', email: 'chulsu@example.com', role: '사용자', status: '차단' },
-  { id: 4, joinDate: '2025-03-18', username: '박영희', email: 'younghee@example.com', role: '사용자', status: '정상' },
-  { id: 5, joinDate: '2025-04-02', username: '이민호', email: 'minho@example.com', role: '관리자', status: '정상' },
-  { id: 6, joinDate: '2025-04-20', username: '최수지', email: 'suji@example.com', role: '사용자', status: '정상' },
-  { id: 7, joinDate: '2025-05-01', username: '정다은', email: 'daeun@example.com', role: '사용자', status: '차단' },
-  { id: 8, joinDate: '2025-05-03', username: '류지훈', email: 'jihun@example.com', role: '관리자', status: '정상' },
-  { id: 9, joinDate: '2025-05-07', username: '송하린', email: 'harin@example.com', role: '사용자', status: '정상' },
-  { id: 10, joinDate: '2025-05-09', username: '오세준', email: 'sejun@example.com', role: '사용자', status: '정상' },
-  { id: 11, joinDate: '2025-05-12', username: '이수민', email: 'sumin@example.com', role: '사용자', status: '정상' },
-  { id: 12, joinDate: '2025-05-14', username: '강민호', email: 'minho2@example.com', role: '관리자', status: '정상' },
+const dummyReservations: Reservation[] = [
+  {
+    id: 1,
+    date: '2025-05-10',
+    area: '충북 옥천군 동이면 23-1번지',
+    time: '10:00 ~ 11:30',
+    tasks: ['토양 수분 측정', '병해 감지'],
+    drone: 'SkyScout X1',
+    status: '대기',
+  },
+  {
+    id: 2,
+    date: '2025-05-11',
+    area: '경기 평택시 신라면 어쩌하리',
+    time: '11:00 ~ 12:30',
+    tasks: ['작물 상태'],
+    drone: 'AgriWing Pro',
+    status: '진행중',
+  },
+  {
+    id: 3,
+    date: '2025-05-12',
+    area: '충북 청주시 상당구 무언가리',
+    time: '09:00 ~ 10:00',
+    tasks: ['수분 측정'],
+    drone: 'CropEye VTOL',
+    status: '완료',
+  },
+  {
+    id: 4,
+    date: '2025-05-13',
+    area: '대전 유성구 어딘가리',
+    time: '14:00 ~ 15:00',
+    tasks: ['병해 감지'],
+    drone: 'SkyScout X1',
+    status: '취소',
+  },
+  {
+    id: 5,
+    date: '2025-05-14',
+    area: '경남 창원시 합포구 무언가로',
+    time: '13:00 ~ 14:30',
+    tasks: ['토양 수분 측정', '작물 상태'],
+    drone: 'AgriWing Pro',
+    status: '대기',
+  },
+  {
+    id: 6,
+    date: '2025-05-15',
+    area: '경북 구미시 금오산로',
+    time: '10:30 ~ 11:30',
+    tasks: ['병해 감지'],
+    drone: 'CropEye VTOL',
+    status: '진행중',
+  },
+  {
+    id: 7,
+    date: '2025-05-16',
+    area: '충북 제천시 한수면 어디로',
+    time: '15:00 ~ 16:00',
+    tasks: ['작물 상태'],
+    drone: 'SkyScout X1',
+    status: '대기',
+  },
+  {
+    id: 8,
+    date: '2025-05-17',
+    area: '경남 밀양시 삼문동 일부로',
+    time: '09:30 ~ 10:30',
+    tasks: ['수분 측정'],
+    drone: 'AgriWing Pro',
+    status: '완료',
+  },
+  {
+    id: 9,
+    date: '2025-05-18',
+    area: '전북 전주시 완산구 어디',
+    time: '11:00 ~ 12:00',
+    tasks: ['병해 감지', '작물 상태'],
+    drone: 'CropEye VTOL',
+    status: '대기',
+  },
+  {
+    id: 10,
+    date: '2025-05-19',
+    area: '광주 북구 운암동 길',
+    time: '14:30 ~ 15:30',
+    tasks: ['토양 수분 측정'],
+    drone: 'SkyScout X1',
+    status: '완료',
+  },
 ]
 
-export default function UserManagementPage() {
-  // (1) 사용자 목록 상태
-  const [users, setUsers] = useState<User[]>(initialUsers)
+// ─── ReservationPage 컴포넌트 ───
+export default function ReservationPage() {
+  // 실제로는 API 호출로 받아온 데이터를 상태로 관리
+  const [reservations, setReservations] =
+    useState<Reservation[]>(dummyReservations)
 
-  // (2) 검색어 및 권한 필터 상태
-  const [searchText, setSearchText] = useState<string>('')
-  const [roleFilter, setRoleFilter] = useState<'전체' | '사용자' | '관리자'>('전체')
-
-  // (3) 페이지네이션 상태
-  const [page, setPage] = useState<number>(1)
-  const pageSize = 5
-  const filteredUsers = useMemo(() => {
-    // 검색어(이름 or 이메일) 필터
-    let tmp = users.filter((u) => {
-      const txt = searchText.trim().toLowerCase()
-      return (
-        u.username.toLowerCase().includes(txt) ||
-        u.email.toLowerCase().includes(txt)
-      )
-    })
-    // 권한(role) 필터
-    if (roleFilter !== '전체') {
-      tmp = tmp.filter((u) => u.role === roleFilter)
-    }
-    return tmp
-  }, [users, searchText, roleFilter])
-
-  const pageCount = Math.ceil(filteredUsers.length / pageSize)
+  // (A) 페이지네이션 상태
+  const [page, setPage] = useState(1)
+  const pageSize = 5 // 한 페이지에 5개씩 노출
+  const pageCount = Math.ceil(reservations.length / pageSize)
   const handlePageChange = (_: React.ChangeEvent<unknown>, value: number) => {
     setPage(value)
   }
-  const displayedUsers = useMemo(() => {
-    const start = (page - 1) * pageSize
-    return filteredUsers.slice(start, start + pageSize)
-  }, [filteredUsers, page])
+  // 현재 페이지에 보여줄 예약 리스트
+  const displayedReservations = reservations.slice(
+    (page - 1) * pageSize,
+    page * pageSize
+  )
 
-  // (4) 점삼개 메뉴 상태
+  // (B) “수정/삭제” 메뉴 상태
   const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement | null>(null)
-  const [menuUserId, setMenuUserId] = useState<number | null>(null)
+  const [menuIndex, setMenuIndex] = useState<number | null>(null)
 
   const handleMenuOpen = (e: React.MouseEvent<HTMLElement>, id: number) => {
     setMenuAnchorEl(e.currentTarget)
-    setMenuUserId(id)
+    setMenuIndex(id)
   }
   const handleMenuClose = () => {
     setMenuAnchorEl(null)
-    setMenuUserId(null)
+    setMenuIndex(null)
   }
 
-  // (5) 사용자 삭제 / 차단 / 해제 함수
-  const deleteUser = (id: number) => {
-    setUsers((prev) => prev.filter((u) => u.id !== id))
+  // (C) “수정” 다이얼로그 상태
+  const [openEditDialog, setOpenEditDialog] = useState<boolean>(false)
+  const [currentEditId, setCurrentEditId] = useState<number | null>(null)
+
+  // (D) 편집 필드 상태
+  const [editDate, setEditDate] = useState<string>('')
+  const [editTime, setEditTime] = useState<string>('')
+  const [editArea, setEditArea] = useState<string>('')
+  const [editTasks, setEditTasks] = useState<string[]>([])
+  const [editDrone, setEditDrone] = useState<string>('')
+  const [editStatus, setEditStatus] = useState<Reservation['status']>('대기')
+
+  // (E) 작업 항목 옵션 & 드론 옵션
+  const taskOptions = ['토양 수분 측정', '병해 감지', '작물 상태']
+  const droneOptions = ['SkyScout X1', 'AgriWing Pro', 'CropEye VTOL']
+
+  // (F) “수정” 다이얼로그 열기
+  const handleOpenEditDialog = (res: Reservation) => {
+    setCurrentEditId(res.id)
+    setEditDate(res.date)
+    setEditTime(res.time)
+    setEditArea(res.area)
+    setEditTasks(res.tasks)
+    setEditDrone(res.drone)
+    setEditStatus(res.status)
+    setOpenEditDialog(true)
     handleMenuClose()
-    // 페이지 인덱스 조정
-    const newCount = Math.ceil((filteredUsers.length - 1) / pageSize)
+  }
+
+  const handleCloseEditDialog = () => {
+    setOpenEditDialog(false)
+    setCurrentEditId(null)
+  }
+
+  // (G) “수정 저장” 로직 (더미: state 업데이트)
+  const handleSaveEdit = () => {
+    if (currentEditId === null) return
+    setReservations((prev) =>
+      prev.map((r) =>
+        r.id === currentEditId
+          ? {
+              ...r,
+              date: editDate,
+              time: editTime,
+              area: editArea,
+              tasks: editTasks,
+              drone: editDrone,
+              status: editStatus,
+            }
+          : r
+      )
+    )
+    handleCloseEditDialog()
+  }
+
+  // (H) “삭제” 로직 (더미: state에서 제거)
+  const handleDeleteReservation = (id: number) => {
+    handleMenuClose()
+    setReservations((prev) => prev.filter((r) => r.id !== id))
+    // 삭제 후 페이지 인덱스가 초과된다면 마지막 페이지로 조정
+    const newCount = Math.ceil((reservations.length - 1) / pageSize)
     if (page > newCount && newCount > 0) {
       setPage(newCount)
     }
   }
-  const blockUser = (id: number) => {
-    setUsers((prev) =>
-      prev.map((u) => (u.id === id ? { ...u, status: '차단' } : u))
+
+  // (I) 작업 항목 체크박스 토글
+  const handleTaskToggle = (task: string) => {
+    setEditTasks((prev) =>
+      prev.includes(task) ? prev.filter((t) => t !== task) : [...prev, task]
     )
-    handleMenuClose()
   }
-  const unblockUser = (id: number) => {
-    setUsers((prev) =>
-      prev.map((u) => (u.id === id ? { ...u, status: '정상' } : u))
-    )
-    handleMenuClose()
+
+  // ─── (J) “드론 비행 요청” 모달 상태 및 필드 ───
+  const [openRequestDialog, setOpenRequestDialog] = useState<boolean>(false)
+
+  // 요청 폼 필드
+  const [reqArea, setReqArea] = useState<string>('')
+  const [reqDate, setReqDate] = useState<string>('')
+  const [reqTime, setReqTime] = useState<string>('')
+  const [reqTasks, setReqTasks] = useState<string[]>([])
+  const [reqNotes, setReqNotes] = useState<string>('')
+
+  const handleOpenRequestDialog = () => {
+    // 초기값 비워두기
+    setReqArea('')
+    setReqDate('')
+    setReqTime('')
+    setReqTasks([])
+    setReqNotes('')
+    setOpenRequestDialog(true)
+  }
+  const handleCloseRequestDialog = () => {
+    setOpenRequestDialog(false)
+  }
+
+  // 요청 폼 제출 (더미: console.log → 실제 API 호출로 교체)
+  const handleSubmitRequest = () => {
+    console.log({
+      area: reqArea,
+      date: reqDate,
+      time: reqTime,
+      tasks: reqTasks,
+      notes: reqNotes,
+    })
+    // 실제 요청 로직을 여기에 작성 (예: API 호출)
+    setOpenRequestDialog(false)
   }
 
   return (
@@ -132,109 +288,67 @@ export default function UserManagementPage() {
         bgcolor: '#f9f9f9',
       }}
     >
-      {/* 공통 Header */}
+      {/* Header */}
       <Header />
 
       {/* Main Content */}
-      <Box component="main" sx={{ mt: '64px', py: 4 }}>
+      <Box component="main" sx={{ mt: '64px', flexGrow: 1, py: 4 }}>
         <Container maxWidth="lg">
-          <Typography variant="h5" gutterBottom>
-            사용자 관리
-          </Typography>
-
-          {/* ─── (6) 상단 툴바: 검색창 + 권한 필터 ─── */}
+          {/* ── 타이틀 + 요청 버튼 (우측) ── */}
           <Box
             sx={{
               display: 'flex',
-              flexWrap: 'wrap',
-              gap: 2,
+              alignItems: 'center',
+              justifyContent: 'space-between',
               mb: 2,
             }}
           >
-            {/* 검색창 */}
-            <TextField
-              size="small"
-              label="검색 (이름 또는 이메일)"
-              variant="outlined"
-              value={searchText}
-              onChange={(e) => {
-                setSearchText(e.target.value)
-                setPage(1)
-              }}
-              sx={{ flex: '1 1 300px' }}
-            />
-
-            {/* 권한 필터 */}
-            <FormControl size="small" sx={{ minWidth: 140 }}>
-              <InputLabel>권한 필터</InputLabel>
-              <Select
-                value={roleFilter}
-                label="권한 필터"
-                onChange={(e) => {
-                  setRoleFilter(e.target.value as '전체' | '사용자' | '관리자')
-                  setPage(1)
-                }}
-              >
-                <SelectMenuItem value="전체">전체</SelectMenuItem>
-                <SelectMenuItem value="사용자">사용자</SelectMenuItem>
-                <SelectMenuItem value="관리자">관리자</SelectMenuItem>
-              </Select>
-            </FormControl>
+            <Typography variant="h5">예약관리</Typography>
+            <Button variant="contained" onClick={handleOpenRequestDialog}>
+              드론 비행 요청
+            </Button>
           </Box>
 
-          {/* ─── (7) 사용자 표 ─── */}
-          <Paper elevation={3}>
+          <Paper elevation={3} sx={{ p: 2 }}>
+            {/* ── 예약 테이블 ── */}
             <TableContainer>
               <Table size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell sx={{ fontWeight: 'bold', width: 80 }} align="center">
-                      번호
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', width: 120 }} align="center">
-                      가입일
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }} align="left">
-                      사용자
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 'bold' }} align="left">
-                      이메일
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', width: 100 }} align="center">
-                      권한
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', width: 100 }} align="center">
-                      상태
-                    </TableCell>
-                    <TableCell sx={{ fontWeight: 'bold', width: 80 }} align="right">
-                      관리
+                    <TableCell sx={{ fontWeight: 'bold' }}>예약 ID</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>예약 일자</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>작업 구역</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>작업 항목</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>드론 기체</TableCell>
+                    <TableCell sx={{ fontWeight: 'bold' }}>상태</TableCell>
+                    <TableCell align="right" sx={{ fontWeight: 'bold' }}>
+                      
                     </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {displayedUsers.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell align="center">{user.id}</TableCell>
-                      <TableCell align="center">{user.joinDate}</TableCell>
-                      <TableCell align="left">{user.username}</TableCell>
-                      <TableCell align="left">{user.email}</TableCell>
-                      <TableCell align="center">{user.role}</TableCell>
-                      <TableCell align="center">{user.status}</TableCell>
+                  {displayedReservations.map((res) => (
+                    <TableRow key={res.id}>
+                      <TableCell>{res.id}</TableCell>
+                      <TableCell>{res.date}</TableCell>
+                      <TableCell>{res.area}</TableCell>
+                      <TableCell>{res.tasks.join(', ')}</TableCell>
+                      <TableCell>{res.drone}</TableCell>
+                      <TableCell>{res.status}</TableCell>
                       <TableCell align="right">
                         <IconButton
                           size="small"
-                          onClick={(e) => handleMenuOpen(e, user.id)}
+                          onClick={(e) => handleMenuOpen(e, res.id)}
                         >
                           <MoreVertIcon fontSize="small" />
                         </IconButton>
                       </TableCell>
                     </TableRow>
                   ))}
-
-                  {displayedUsers.length === 0 && (
+                  {displayedReservations.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
-                        조회된 사용자가 없습니다.
+                      <TableCell colSpan={7} sx={{ textAlign: 'center', py: 3 }}>
+                        예약된 내역이 없습니다.
                       </TableCell>
                     </TableRow>
                   )}
@@ -242,9 +356,9 @@ export default function UserManagementPage() {
               </Table>
             </TableContainer>
 
-            {/* ─── (8) 페이지네이션 ─── */}
+            {/* ── 페이지네이션 ── */}
             {pageCount > 1 && (
-              <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
                 <Pagination
                   count={pageCount}
                   page={page}
@@ -255,36 +369,279 @@ export default function UserManagementPage() {
               </Box>
             )}
 
-            {/* ─── (9) 점삼개 메뉴 (삭제/차단/해제) ─── */}
+            {/* ── 점삼개 메뉴 (수정 / 삭제) ── */}
             <Menu
               anchorEl={menuAnchorEl}
-              open={Boolean(menuAnchorEl) && menuUserId !== null}
+              open={Boolean(menuAnchorEl) && menuIndex !== null}
               onClose={handleMenuClose}
               anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
               transformOrigin={{ vertical: 'top', horizontal: 'right' }}
             >
               <MenuItem
                 onClick={() => {
-                  if (menuUserId !== null) deleteUser(menuUserId)
+                  const res = reservations.find((r) => r.id === menuIndex)
+                  if (res) handleOpenEditDialog(res)
+                }}
+              >
+                수정
+              </MenuItem>
+              <MenuItem
+                onClick={() => {
+                  if (menuIndex !== null) handleDeleteReservation(menuIndex)
                 }}
               >
                 삭제
               </MenuItem>
-              {menuUserId !== null && (
-                users.find((u) => u.id === menuUserId)?.status === '정상' ? (
-                  <MenuItem onClick={() => blockUser(menuUserId)}>
-                    차단
-                  </MenuItem>
-                ) : (
-                  <MenuItem onClick={() => unblockUser(menuUserId)}>
-                    해제
-                  </MenuItem>
-                )
-              )}
             </Menu>
           </Paper>
         </Container>
       </Box>
+
+      {/* ─── “수정” 다이얼로그 ─── */}
+      <Dialog
+        open={openEditDialog}
+        onClose={handleCloseEditDialog}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <IconButton onClick={handleCloseEditDialog} size="small">
+            <ArrowBackIcon />
+          </IconButton>
+          예약 수정
+        </DialogTitle>
+        <DialogContent dividers>
+          {/* 예약 일자 */}
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="body1" sx={{ mb: 0.5 }}>
+              예약 일자
+            </Typography>
+            <TextField
+              fullWidth
+              variant="outlined"
+              size="small"
+              type="date"
+              InputLabelProps={{ shrink: true }}
+              value={editDate}
+              onChange={(e) => setEditDate(e.target.value)}
+            />
+          </Box>
+
+          {/* 예약 시간 */}
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="body1" sx={{ mb: 0.5 }}>
+              예약 시간
+            </Typography>
+            <TextField
+              fullWidth
+              variant="outlined"
+              size="small"
+              type="time"
+              InputLabelProps={{ shrink: true }}
+              value={editTime}
+              onChange={(e) => setEditTime(e.target.value)}
+            />
+          </Box>
+
+          {/* 작업 구역 */}
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="body1" sx={{ mb: 0.5 }}>
+              작업 구역
+            </Typography>
+            <TextField
+              fullWidth
+              variant="outlined"
+              size="small"
+              value={editArea}
+              onChange={(e) => setEditArea(e.target.value)}
+            />
+          </Box>
+
+          {/* 작업 항목 체크박스 */}
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="body1" sx={{ mb: 0.5 }}>
+              작업 항목
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+              {taskOptions.map((task) => (
+                <FormControlLabel
+                  key={task}
+                  control={
+                    <Checkbox
+                      checked={editTasks.includes(task)}
+                      onChange={() => handleTaskToggle(task)}
+                    />
+                  }
+                  label={task}
+                />
+              ))}
+            </Box>
+          </Box>
+
+          {/* 드론 기체 선택 */}
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="body1" sx={{ mb: 0.5 }}>
+              드론 기체 선택
+            </Typography>
+            <FormControl fullWidth size="small">
+              <InputLabel>기체 선택</InputLabel>
+              <Select
+                value={editDrone}
+                label="기체 선택"
+                onChange={(e) => setEditDrone(e.target.value)}
+              >
+                {droneOptions.map((drone) => (
+                  <MenuItem key={drone} value={drone}>
+                    {drone}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+
+          {/* 상태 변경 */}
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="body1" sx={{ mb: 0.5 }}>
+              상태
+            </Typography>
+            <FormControl fullWidth size="small">
+              <InputLabel>상태 선택</InputLabel>
+              <Select
+                value={editStatus}
+                label="상태 선택"
+                onChange={(e) =>
+                  setEditStatus(e.target.value as Reservation['status'])
+                }
+              >
+                <MenuItem value="대기">대기</MenuItem>
+                <MenuItem value="진행중">진행중</MenuItem>
+                <MenuItem value="완료">완료</MenuItem>
+                <MenuItem value="취소">취소</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+        </DialogContent>
+
+        <DialogActions sx={{ px: 3, py: 2 }}>
+          <Button color="error" variant="contained" onClick={handleCloseEditDialog}>
+            취소
+          </Button>
+          <Box sx={{ flex: 1 }} />
+          <Button variant="contained" onClick={handleSaveEdit}>
+            저장
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* ─── “드론 비행 요청” 모달 ─── */}
+      <Dialog
+        open={openRequestDialog}
+        onClose={handleCloseRequestDialog}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>드론 비행 요청</DialogTitle>
+        <DialogContent dividers>
+          {/* 대상 구역(농장) */}
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="body1" sx={{ mb: 0.5 }}>
+              대상 구역 (농장)
+            </Typography>
+            <TextField
+              fullWidth
+              variant="outlined"
+              size="small"
+              placeholder="농장 위치를 입력하세요"
+              value={reqArea}
+              onChange={(e) => setReqArea(e.target.value)}
+            />
+          </Box>
+
+          {/* 날짜 선택 */}
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="body1" sx={{ mb: 0.5 }}>
+              날짜 선택
+            </Typography>
+            <TextField
+              fullWidth
+              variant="outlined"
+              size="small"
+              type="date"
+              InputLabelProps={{ shrink: true }}
+              value={reqDate}
+              onChange={(e) => setReqDate(e.target.value)}
+            />
+          </Box>
+
+          {/* 시간 선택 */}
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="body1" sx={{ mb: 0.5 }}>
+              시간 선택
+            </Typography>
+            <TextField
+              fullWidth
+              variant="outlined"
+              size="small"
+              type="time"
+              InputLabelProps={{ shrink: true }}
+              value={reqTime}
+              onChange={(e) => setReqTime(e.target.value)}
+            />
+          </Box>
+
+          {/* 비행 목적 체크박스 */}
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="body1" sx={{ mb: 0.5 }}>
+              비행 목적
+            </Typography>
+            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+              {taskOptions.map((task) => (
+                <FormControlLabel
+                  key={task}
+                  control={
+                    <Checkbox
+                      checked={reqTasks.includes(task)}
+                      onChange={() => {
+                        setReqTasks((prev) =>
+                          prev.includes(task)
+                            ? prev.filter((t) => t !== task)
+                            : [...prev, task]
+                        )
+                      }}
+                    />
+                  }
+                  label={task}
+                />
+              ))}
+            </Box>
+          </Box>
+
+          {/* 비고 입력 */}
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="body1" sx={{ mb: 0.5 }}>
+              비고
+            </Typography>
+            <TextField
+              fullWidth
+              variant="outlined"
+              size="small"
+              placeholder="추가로 남길 메모가 있으면 작성하세요"
+              value={reqNotes}
+              onChange={(e) => setReqNotes(e.target.value)}
+            />
+          </Box>
+        </DialogContent>
+
+        <DialogActions sx={{ px: 3, py: 2 }}>
+          <Button color="error" variant="contained" onClick={handleCloseRequestDialog}>
+            취소
+          </Button>
+          <Box sx={{ flex: 1 }} />
+          <Button variant="contained" onClick={handleSubmitRequest}>
+            비행 요청
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }
